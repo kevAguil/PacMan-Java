@@ -222,11 +222,33 @@ public class PacMan extends JPanel implements  ActionListener, KeyListener {
         }
         //score
         g.setFont(new Font("Arial", Font.PLAIN, 18));
+
+        //transparent black rectangle
+        Color transparentBlack = new Color(0, 0, 0, 127);
+
+        //game over screen
         if(gameOver) {
+            g.setColor(transparentBlack);
+            g.fillRect(0,0, boardWidth, boardHeight);
+            g.setColor(Color.WHITE);
             g.drawString("Game Over:  " + String.valueOf(score), tileSize/2, tileSize/2);
+            g.drawString("Press Enter to Play Again!", tileSize/2, tileSize/2 * 3);
         }
         else {
             g.drawString("x" + String.valueOf(lives) + " Score: " + String.valueOf(score), tileSize/2, tileSize/2);
+        }
+
+        //Add paused game screen and instruction
+        if (!gameOver) {
+            if (gamePaused) {
+                g.setColor(transparentBlack);
+                g.fillRect(0,0, boardWidth, boardHeight);
+                g.setColor(Color.WHITE);
+                g.drawString("Game Paused", boardWidth - tileSize * 4, tileSize/2);
+            }
+            else {
+                g.drawString("Press P to Pause", boardWidth - tileSize * 5, tileSize/2);
+            }
         }
 
     }
@@ -322,7 +344,19 @@ public class PacMan extends JPanel implements  ActionListener, KeyListener {
 
     @Override
     public void keyReleased(KeyEvent e) {
-        if (gameOver) {
+        //If the game is paused, it will unpause the game, otherwise it will pause it
+        if (!gameOver && gamePaused && e.getKeyCode() == KeyEvent.VK_P) {
+            gamePaused = false;
+            gameLoop.start();
+        }
+        else if (!gameOver && e.getKeyCode() == KeyEvent.VK_P) {
+            gamePaused = true;
+            repaint();
+            gameLoop.stop();
+        }
+
+        //if game ends and user presses enter, it will restart the game
+        if (gameOver && e.getKeyCode() == KeyEvent.VK_ENTER) {
             loadMap();
             resetPositions();
             lives = 3;
